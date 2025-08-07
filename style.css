@@ -10,4 +10,61 @@ body {
     display: block;
     margin: 0 auto;
   }
-  
+  #topbar {
+  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+#gameOver {
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+#hud {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 10;
+  font-family: 'Fredoka One', cursive;
+  color: white;
+  text-shadow: 2px 2px 4px #000;
+}
+
+#score {
+  font-size: 1.8rem;
+}
+
+#lives {
+  font-size: 1.5rem;
+  margin-top: 5px;
+}
+
+#restartBtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  padding: 10px 20px;
+  font-family: 'Fredoka One', cursive;
+  background-color: orange;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 2px 2px 5px #333;
+  cursor: pointer;
+  z-index: 20;
+}

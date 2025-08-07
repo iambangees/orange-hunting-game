@@ -1,16 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Orange Hunting Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orange Hunt Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: url("background.jpg") no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    #score {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      color: white;
+      font-size: 2rem;
+      font-family: 'Fredoka One', cursive;
+      text-shadow: 2px 2px 4px #000;
+      z-index: 10;
+    }
+
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+  </style>
 </head>
 <body>
-  <h1>🍊 Orange Hunting</h1>
-  <p>Score: <span id="score">0</span></p>
+  <div id="hud">
+  <div id="score">Score: 0</div>
+  <div id="lives">❤️❤️❤️</div>
+</div>
+<button id="restartBtn" style="display: none;">Play Again</button>
+
+
   <canvas id="gameCanvas"></canvas>
   <audio id="popSound" src="pop.mp3" preload="auto"></audio>
 
-  <script src="script.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
