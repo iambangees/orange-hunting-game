@@ -1,131 +1,154 @@
+// Get elements
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let score = 0;
-let gameRunning = false;
-let gamePaused = false;
-
-const scoreDisplay = document.getElementById("score");
+const startButton = document.getElementById("startButton");
 const pauseButton = document.getElementById("pauseButton");
+const retryButton = document.getElementById("retryButton");
 const gameOverScreen = document.getElementById("gameOverScreen");
-const tryAgainBtn = document.getElementById("tryAgainBtn");
+const scoreDisplay = document.getElementById("scoreDisplay");
 const popSound = document.getElementById("popSound");
 
+// Load images
 const orangeImg = new Image();
 orangeImg.src = "orange.png";
 
 const bombImg = new Image();
 bombImg.src = "bomb.png";
 
-// Sizes for responsive design
-const fruitSize = Math.min(canvas.width, canvas.height) * 0.08;
+// Game variables
+let oranges = [];
+let bombs = [];
+let score = 0;
+let isPlaying = false;
+let isPaused = false;
+let orangeSize, bombSize;
 
-let fruits = [];
+// Adjust canvas size dynamically
+function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    orangeSize = canvas.width * 0.15; // 15% of width
+    bombSize = canvas.width * 0.15;   // same size as oranges
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
-function randomX() {
-  return Math.random() * (canvas.width - fruitSize);
+// Orange object
+function createOrange() {
+    oranges.push({
+        x: Math.random() * (canvas.width - orangeSize),
+        y: -orangeSize,
+        speed: canvas.height * 0.005
+    });
 }
 
-function spawnFruit() {
-  const isBomb = Math.random() < 0.2;
-  fruits.push({
-    x: randomX(),
-    y: -fruitSize,
-    speed: Math.random() * 2 + 2,
-    isBomb: isBomb
-  });
+// Bomb object
+function createBomb() {
+    bombs.push({
+        x: Math.random() * (canvas.width - bombSize),
+        y: -bombSize,
+        speed: canvas.height * 0.004
+    });
 }
 
-function drawFruit(fruit) {
-  const img = fruit.isBomb ? bombImg : orangeImg;
-  ctx.drawImage(img, fruit.x, fruit.y, fruitSize, fruitSize);
+// Game loop
+function update() {
+    if (!isPlaying || isPaused) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw oranges
+    oranges.forEach((o, i) => {
+        o.y += o.speed;
+        ctx.drawImage(orangeImg, o.x, o.y, orangeSize, orangeSize);
+
+        if (o.y > canvas.height) oranges.splice(i, 1);
+    });
+
+    // Draw bombs
+    bombs.forEach((b, i) => {
+        b.y += b.speed;
+        ctx.drawImage(bombImg, b.x, b.y, bombSize, bombSize);
+
+        if (b.y > canvas.height) bombs.splice(i, 1);
+    });
+
+    requestAnimationFrame(update);
 }
 
-function updateFruits() {
-  fruits.forEach(fruit => {
-    fruit.y += fruit.speed;
-  });
-  fruits = fruits.filter(fruit => fruit.y < canvas.height + fruitSize);
+// Click/touch detection
+function checkHit(x, y) {
+    // Oranges
+    oranges.forEach((o, i) => {
+        if (x > o.x && x < o.x + orangeSize && y > o.y && y < o.y + orangeSize) {
+            oranges.splice(i, 1);
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+            popSound.currentTime = 0;
+            popSound.play();
+        }
+    });
+
+    // Bombs
+    bombs.forEach((b, i) => {
+        if (x > b.x && x < b.x + bombSize && y > b.y && y < b.y + bombSize) {
+            endGame();
+        }
+    });
 }
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  fruits.forEach(drawFruit);
-
-  if (gameRunning && !gamePaused) {
-    updateFruits();
-    if (Math.random() < 0.03) spawnFruit();
-  }
-
-  requestAnimationFrame(draw);
-}
-
-function getClickedFruit(x, y) {
-  return fruits.find(fruit => {
-    return (
-      x >= fruit.x &&
-      x <= fruit.x + fruitSize &&
-      y >= fruit.y &&
-      y <= fruit.y + fruitSize
-    );
-  });
-}
-
-function handleCanvasClick(e) {
-  if (!gameRunning || gamePaused) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-  const clickY = e.clientY - rect.top;
-
-  const clicked = getClickedFruit(clickX, clickY);
-
-  if (clicked) {
-    if (clicked.isBomb) {
-      endGame();
-    } else {
-      score++;
-      popSound.currentTime = 0;
-      popSound.play();
-      fruits.splice(fruits.indexOf(clicked), 1);
-      scoreDisplay.textContent = `Score: ${score}`;
-    }
-  }
-}
-
-canvas.addEventListener("click", handleCanvasClick);
-canvas.addEventListener("touchstart", function (e) {
-  const touch = e.touches[0];
-  handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
+// Mouse/touch events
+canvas.addEventListener("click", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    checkHit(e.clientX - rect.left, e.clientY - rect.top);
 });
 
-pauseButton.addEventListener("click", () => {
-  gamePaused = !gamePaused;
-  pauseButton.textContent = gamePaused ? "Resume" : "Pause";
-});
+canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    checkHit(touch.clientX - rect.left, touch.clientY - rect.top);
+}, { passive: false });
 
-tryAgainBtn.addEventListener("click", startGame);
-
+// Start game
 function startGame() {
-  score = 0;
-  fruits = [];
-  gameRunning = true;
-  gamePaused = false;
-  scoreDisplay.textContent = "Score: 0";
-  gameOverScreen.style.display = "none";
-  pauseButton.style.display = "block";
-  pauseButton.textContent = "Pause";
+    score = 0;
+    scoreDisplay.textContent = "Score: 0";
+    oranges = [];
+    bombs = [];
+    isPlaying = true;
+    isPaused = false;
+    gameOverScreen.style.display = "none";
+    pauseButton.style.display = "block";
+    startButton.style.display = "none";
+
+    // Spawn oranges & bombs
+    setInterval(() => {
+        if (isPlaying && !isPaused) createOrange();
+    }, 1000);
+
+    setInterval(() => {
+        if (isPlaying && !isPaused) createBomb();
+    }, 3000);
+
+    update();
 }
 
+// Pause game
+function togglePause() {
+    isPaused = !isPaused;
+    pauseButton.textContent = isPaused ? "Resume" : "Pause";
+    if (!isPaused) update();
+}
+
+// End game
 function endGame() {
-  gameRunning = false;
-  gameOverScreen.style.display = "block";
-  pauseButton.style.display = "none";
+    isPlaying = false;
+    pauseButton.style.display = "none";
+    gameOverScreen.style.display = "flex";
 }
 
-// Start animation loop
-draw();
+// Event listeners
+startButton.addEventListener("click", startGame);
+pauseButton.addEventListener("click", togglePause);
+retryButton.addEventListener("click", startGame);

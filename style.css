@@ -1,68 +1,100 @@
+/* Reset default margins/padding */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: sans-serif;
-  background-color: #000;
+body {
+    background: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
 }
 
-#game-container {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
+#gameContainer {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 3 / 4;
+    background: url("background.png") center/cover no-repeat;
+    overflow: hidden;
 }
 
 canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  background: url('background.png') no-repeat center center;
-  background-size: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
-#score {
-  position: absolute;
-  top: 2vh;
-  right: 2vw;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 10px 15px;
-  border-radius: 5px;
-  font-size: 4vw;
-  z-index: 2;
+/* Score Display */
+#scoreDisplay {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: clamp(20px, 5vw, 36px);
+    background: rgba(0,0,0,0.5);
+    padding: 6px 14px;
+    border-radius: 8px;
+}
+
+/* Buttons */
+#startButton, #pauseButton, #retryButton {
+    font-size: clamp(18px, 4vw, 28px);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: orange;
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#startButton {
+    bottom: 20px;
 }
 
 #pauseButton {
-  position: absolute;
-  top: 2vh;
-  left: 2vw;
-  font-size: 4vw;
-  padding: 10px 15px;
-  z-index: 2;
+    top: 60px;
+    right: 20px;
+    transform: none;
 }
 
+#retryButton {
+    bottom: 20px;
+}
+
+/* Game Over Screen */
 #gameOverScreen {
-  position: absolute;
-  bottom: 5vh;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  z-index: 3;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
-#gameOverScreen .game-over-text {
-  color: white;
-  font-size: 6vw;
-  margin-bottom: 10px;
+#gameOverScreen h1 {
+    font-size: clamp(24px, 6vw, 48px);
+    margin-bottom: 10px;
 }
 
-#tryAgainBtn {
-  font-size: 4vw;
-  padding: 10px 20px;
+#gameOverScreen p {
+    font-size: clamp(18px, 4vw, 28px);
+    margin-bottom: 20px;
 }
