@@ -1,107 +1,151 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const scoreDisplay = document.getElementById("score");
-const livesDisplay = document.getElementById("lives");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const orangeImg = new Image();
+orangeImg.src = "orange.png";
+
+const bombImg = new Image();
+bombImg.src = "bomb.png";
+
 const popSound = document.getElementById("popSound");
+
+const scoreDisplay = document.getElementById("score");
+const finalScore = document.getElementById("finalScore");
+const gameOverScreen = document.getElementById("gameOverScreen");
 const restartBtn = document.getElementById("restartBtn");
+const pauseBtn = document.getElementById("pauseBtn");
 
+let oranges = [];
+let bombs = [];
 let score = 0;
-let lives = 3;
-let gameOver = false;
+let isGameOver = false;
+let isPaused = false;
+let combo = 0;
+let spawnInterval;
 
-const orangeImage = new Image();
-orangeImage.src = "orange.png";
-
-let orange = {
-  x: 100,
-  y: -100,
-  size: 60,
-  speedY: 2 + Math.random() * 2
-};
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-function spawnOrange() {
-  orange.x = Math.random() * (canvas.width - orange.size);
-  orange.y = -orange.size;
-  orange.size = 50 + Math.random() * 20;
-  orange.speedY = 2 + Math.random() * 2;
+function spawnObject() {
+  const isBomb = Math.random() < 0.2;
+  const obj = {
+    x: Math.random() * (canvas.width - 50),
+    y: -50,
+    width: 50,
+    height: 50,
+    speed: 2 + Math.random() * 3,
+    type: isBomb ? "bomb" : "orange"
+  };
+  if (isBomb) {
+    bombs.push(obj);
+  } else {
+    oranges.push(obj);
+  }
 }
 
-function draw() {
-  if (gameOver) return;
+function drawObject(obj, img) {
+  ctx.drawImage(img, obj.x, obj.y, obj.width, obj.height);
+}
+
+function updateGame() {
+  if (isGameOver || isPaused) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.drawImage(orangeImage, orange.x, orange.y, orange.size, orange.size);
-  orange.y += orange.speedY;
+  oranges.forEach((orange, index) => {
+    orange.y += orange.speed;
+    drawObject(orange, orangeImg);
 
-  if (orange.y > canvas.height) {
-    lives--;
-    updateHUD();
-    if (lives <= 0) {
-      endGame();
-      return;
+    if (orange.y > canvas.height) {
+      oranges.splice(index, 1);
+      combo = 0; // missed orange resets combo
     }
-    spawnOrange();
-  }
+  });
 
-  requestAnimationFrame(draw);
+  bombs.forEach((bomb, index) => {
+    bomb.y += bomb.speed;
+    drawObject(bomb, bombImg);
+
+    if (bomb.y > canvas.height) {
+      bombs.splice(index, 1);
+    }
+  });
+
+  requestAnimationFrame(updateGame);
 }
-spawnOrange();
-draw();
 
-function handleClick(e) {
-  if (gameOver) return;
+canvas.addEventListener("click", (e) => {
+  if (isGameOver || isPaused) return;
 
   const rect = canvas.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
 
-  const x = clientX - rect.left;
-  const y = clientY - rect.top;
+  let hit = false;
 
-  const dx = x - (orange.x + orange.size / 2);
-  const dy = y - (orange.y + orange.size / 2);
-  const distance = Math.sqrt(dx * dx + dy * dy);
+  oranges.forEach((orange, index) => {
+    if (
+      clickX >= orange.x && clickX <= orange.x + orange.width &&
+      clickY >= orange.y && clickY <= orange.y + orange.height
+    ) {
+      oranges.splice(index, 1);
+      popSound.currentTime = 0;
+      popSound.play();
+      combo++;
+      let comboBonus = combo >= 3 ? 3 : combo;
+      score += comboBonus;
+      scoreDisplay.textContent = score;
+      hit = true;
+    }
+  });
 
-  if (distance < orange.size / 2) {
-    score++;
-    popSound.currentTime = 0;
-    popSound.play();
-    updateHUD();
-    spawnOrange();
+  bombs.forEach((bomb) => {
+    if (
+      clickX >= bomb.x && clickX <= bomb.x + bomb.width &&
+      clickY >= bomb.y && clickY <= bomb.y + bomb.height
+    ) {
+      gameOver();
+      hit = true;
+    }
+  });
+
+  if (!hit) {
+    combo = 0;
   }
-}
+});
 
-function updateHUD() {
-  scoreDisplay.textContent = `Score: ${score}`;
-  livesDisplay.textContent = '❤️'.repeat(lives);
-}
-
-function endGame() {
-  gameOver = true;
-  scoreDisplay.textContent = `Game Over! Final Score: ${score}`;
-  livesDisplay.textContent = '💀';
-  restartBtn.style.display = 'block';
+function gameOver() {
+  isGameOver = true;
+  clearInterval(spawnInterval);
+  gameOverScreen.style.display = "block";
+  finalScore.textContent = score;
 }
 
 restartBtn.addEventListener("click", () => {
-  // Reset game
   score = 0;
-  lives = 3;
-  gameOver = false;
-  restartBtn.style.display = 'none';
-  updateHUD();
-  spawnOrange();
-  draw();
+  combo = 0;
+  isGameOver = false;
+  oranges = [];
+  bombs = [];
+  scoreDisplay.textContent = score;
+  gameOverScreen.style.display = "none";
+  spawnInterval = setInterval(spawnObject, 1000);
+  updateGame();
 });
 
-canvas.addEventListener("click", handleClick);
-canvas.addEventListener("touchstart", handleClick);
+pauseBtn.addEventListener("click", () => {
+  isPaused = !isPaused;
+  pauseBtn.textContent = isPaused ? "▶️ Resume" : "⏸ Pause";
+  if (!isPaused) {
+    updateGame();
+  }
+});
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// Start the game
+spawnInterval = setInterval(spawnObject, 1000);
+updateGame();

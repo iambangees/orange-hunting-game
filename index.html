@@ -1,45 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orange Hunt Game</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: url("background.jpg") no-repeat center center fixed;
-      background-size: cover;
-    }
-
-    #score {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      color: white;
-      font-size: 2rem;
-      font-family: 'Fredoka One', cursive;
-      text-shadow: 2px 2px 4px #000;
-      z-index: 10;
-    }
-
-    canvas {
-      display: block;
-      touch-action: none;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Orange Hunting Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="hud">
-  <div id="score">Score: 0</div>
-  <div id="lives">❤️❤️❤️</div>
-</div>
-<button id="restartBtn" style="display: none;">Play Again</button>
-
-
+  <div id="gameUI">
+    <div id="scoreBoard">🍊 Score: <span id="score">0</span></div>
+    <div id="pauseBtn">⏸ Pause</div>
+  </div>
   <canvas id="gameCanvas"></canvas>
+
+  <div id="gameOverScreen">
+    <h1>💀 Game Over! Final Score: <span id="finalScore">0</span></h1>
+    <button id="restartBtn">🔁 Try Again</button>
+  </div>
+
   <audio id="popSound" src="pop.mp3" preload="auto"></audio>
 
   <script src="game.js"></script>
