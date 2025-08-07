@@ -1,56 +1,95 @@
-body, html {
+body {
   margin: 0;
   padding: 0;
+  background: url('background.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: Arial, sans-serif;
   overflow: hidden;
-  font-family: 'Comic Sans MS', cursive, sans-serif;
 }
 
 #gameCanvas {
   display: block;
-  background: url('background.png') no-repeat center center;
-  background-size: cover;
-  width: 100vw;
-  height: 100vh;
+  margin: 0 auto;
+  background-color: transparent;
+  position: relative;
 }
 
-#gameUI {
+#score,
+#combo,
+#timer {
   position: absolute;
   top: 10px;
-  left: 10px;
-  z-index: 2;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
   color: white;
-  font-size: 24px;
-  text-shadow: 2px 2px 4px black;
-  display: flex;
-  gap: 20px;
-  align-items: center;
+  font-weight: bold;
+  text-shadow: 1px 1px 3px #000;
+  z-index: 2;
 }
 
 #pauseBtn {
-  background: rgba(0, 0, 0, 0.4);
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
   padding: 5px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  user-select: none;
+  z-index: 2;
 }
 
 #gameOverScreen {
   position: absolute;
-  bottom: 50px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
-  text-align: center;
   color: white;
-  z-index: 3;
-  display: none;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 20px;
-  border-radius: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  text-shadow: 1px 1px 3px #000;
+  z-index: 2;
+  text-align: center;
 }
 
-#restartBtn {
-  margin-top: 10px;
+#gameOverScreen button {
+  margin-top: 15px;
   padding: 10px 20px;
-  font-size: 18px;
+  font-size: 20px;
+  background-color: #ff6600;
+  color: white;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
+}
+
+#gameOverScreen button:hover {
+  background-color: #e65c00;
+}
+
+/* 📱 MOBILE OPTIMIZATION */
+@media (max-width: 768px) {
+  #score,
+  #combo,
+  #timer {
+    font-size: 22px;
+    top: 5px;
+  }
+
+  #pauseBtn {
+    font-size: 20px;
+    padding: 4px 8px;
+  }
+
+  #gameCanvas {
+    width: 100vw;
+    height: 70vh;
+  }
+
+  #gameOverScreen {
+    font-size: 24px;
+  }
+
+  #gameOverScreen button {
+    font-size: 18px;
+    padding: 8px 16px;
+  }
 }
