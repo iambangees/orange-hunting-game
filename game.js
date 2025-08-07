@@ -4,148 +4,128 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let score = 0;
+let gameRunning = false;
+let gamePaused = false;
+
+const scoreDisplay = document.getElementById("score");
+const pauseButton = document.getElementById("pauseButton");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const tryAgainBtn = document.getElementById("tryAgainBtn");
+const popSound = document.getElementById("popSound");
+
 const orangeImg = new Image();
 orangeImg.src = "orange.png";
 
 const bombImg = new Image();
 bombImg.src = "bomb.png";
 
-const popSound = document.getElementById("popSound");
+// Sizes for responsive design
+const fruitSize = Math.min(canvas.width, canvas.height) * 0.08;
 
-const scoreDisplay = document.getElementById("score");
-const finalScore = document.getElementById("finalScore");
-const gameOverScreen = document.getElementById("gameOverScreen");
-const restartBtn = document.getElementById("restartBtn");
-const pauseBtn = document.getElementById("pauseBtn");
+let fruits = [];
 
-let oranges = [];
-let bombs = [];
-let score = 0;
-let isGameOver = false;
-let isPaused = false;
-let combo = 0;
-let spawnInterval;
+function randomX() {
+  return Math.random() * (canvas.width - fruitSize);
+}
 
-function spawnObject() {
+function spawnFruit() {
   const isBomb = Math.random() < 0.2;
-  const obj = {
-    x: Math.random() * (canvas.width - 50),
-    y: -50,
-    width: 50,
-    height: 50,
-    speed: 2 + Math.random() * 3,
-    type: isBomb ? "bomb" : "orange"
-  };
-  if (isBomb) {
-    bombs.push(obj);
-  } else {
-    oranges.push(obj);
-  }
+  fruits.push({
+    x: randomX(),
+    y: -fruitSize,
+    speed: Math.random() * 2 + 2,
+    isBomb: isBomb
+  });
 }
 
-function drawObject(obj, img) {
-  ctx.drawImage(img, obj.x, obj.y, obj.width, obj.height);
+function drawFruit(fruit) {
+  const img = fruit.isBomb ? bombImg : orangeImg;
+  ctx.drawImage(img, fruit.x, fruit.y, fruitSize, fruitSize);
 }
 
-function updateGame() {
-  if (isGameOver || isPaused) return;
+function updateFruits() {
+  fruits.forEach(fruit => {
+    fruit.y += fruit.speed;
+  });
+  fruits = fruits.filter(fruit => fruit.y < canvas.height + fruitSize);
+}
 
+function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  oranges.forEach((orange, index) => {
-    orange.y += orange.speed;
-    drawObject(orange, orangeImg);
+  fruits.forEach(drawFruit);
 
-    if (orange.y > canvas.height) {
-      oranges.splice(index, 1);
-      combo = 0; // missed orange resets combo
-    }
-  });
+  if (gameRunning && !gamePaused) {
+    updateFruits();
+    if (Math.random() < 0.03) spawnFruit();
+  }
 
-  bombs.forEach((bomb, index) => {
-    bomb.y += bomb.speed;
-    drawObject(bomb, bombImg);
-
-    if (bomb.y > canvas.height) {
-      bombs.splice(index, 1);
-    }
-  });
-
-  requestAnimationFrame(updateGame);
+  requestAnimationFrame(draw);
 }
 
-canvas.addEventListener("click", (e) => {
-  if (isGameOver || isPaused) return;
+function getClickedFruit(x, y) {
+  return fruits.find(fruit => {
+    return (
+      x >= fruit.x &&
+      x <= fruit.x + fruitSize &&
+      y >= fruit.y &&
+      y <= fruit.y + fruitSize
+    );
+  });
+}
+
+function handleCanvasClick(e) {
+  if (!gameRunning || gamePaused) return;
 
   const rect = canvas.getBoundingClientRect();
   const clickX = e.clientX - rect.left;
   const clickY = e.clientY - rect.top;
 
-  let hit = false;
+  const clicked = getClickedFruit(clickX, clickY);
 
-  oranges.forEach((orange, index) => {
-    if (
-      clickX >= orange.x && clickX <= orange.x + orange.width &&
-      clickY >= orange.y && clickY <= orange.y + orange.height
-    ) {
-      oranges.splice(index, 1);
+  if (clicked) {
+    if (clicked.isBomb) {
+      endGame();
+    } else {
+      score++;
       popSound.currentTime = 0;
       popSound.play();
-      combo++;
-      let comboBonus = combo >= 3 ? 3 : combo;
-      score += comboBonus;
-      scoreDisplay.textContent = score;
-      hit = true;
+      fruits.splice(fruits.indexOf(clicked), 1);
+      scoreDisplay.textContent = `Score: ${score}`;
     }
-  });
-
-  bombs.forEach((bomb) => {
-    if (
-      clickX >= bomb.x && clickX <= bomb.x + bomb.width &&
-      clickY >= bomb.y && clickY <= bomb.y + bomb.height
-    ) {
-      gameOver();
-      hit = true;
-    }
-  });
-
-  if (!hit) {
-    combo = 0;
   }
-});
-
-function gameOver() {
-  isGameOver = true;
-  clearInterval(spawnInterval);
-  gameOverScreen.style.display = "block";
-  finalScore.textContent = score;
 }
 
-restartBtn.addEventListener("click", () => {
+canvas.addEventListener("click", handleCanvasClick);
+canvas.addEventListener("touchstart", function (e) {
+  const touch = e.touches[0];
+  handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
+});
+
+pauseButton.addEventListener("click", () => {
+  gamePaused = !gamePaused;
+  pauseButton.textContent = gamePaused ? "Resume" : "Pause";
+});
+
+tryAgainBtn.addEventListener("click", startGame);
+
+function startGame() {
   score = 0;
-  combo = 0;
-  isGameOver = false;
-  oranges = [];
-  bombs = [];
-  scoreDisplay.textContent = score;
+  fruits = [];
+  gameRunning = true;
+  gamePaused = false;
+  scoreDisplay.textContent = "Score: 0";
   gameOverScreen.style.display = "none";
-  spawnInterval = setInterval(spawnObject, 1000);
-  updateGame();
-});
+  pauseButton.style.display = "block";
+  pauseButton.textContent = "Pause";
+}
 
-pauseBtn.addEventListener("click", () => {
-  isPaused = !isPaused;
-  pauseBtn.textContent = isPaused ? "▶️ Resume" : "⏸ Pause";
-  if (!isPaused) {
-    updateGame();
-  }
-});
+function endGame() {
+  gameRunning = false;
+  gameOverScreen.style.display = "block";
+  pauseButton.style.display = "none";
+}
 
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
-
-// Start the game
-spawnInterval = setInterval(spawnObject, 1000);
-updateGame();
+// Start animation loop
+draw();

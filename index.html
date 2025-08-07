@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Orange Hunting Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orange Hunt</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="gameUI">
-    <div id="scoreBoard">🍊 Score: <span id="score">0</span></div>
-    <div id="pauseBtn">⏸ Pause</div>
-  </div>
-  <canvas id="gameCanvas"></canvas>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
 
-  <div id="gameOverScreen">
-    <h1>💀 Game Over! Final Score: <span id="finalScore">0</span></h1>
-    <button id="restartBtn">🔁 Try Again</button>
+    <div id="score">Score: 0</div>
+    <button id="pauseButton" style="display: none;">Pause</button>
+
+    <div id="gameOverScreen" style="display: none;">
+      <div class="game-over-text">Game Over</div>
+      <button id="tryAgainBtn">Try Again</button>
+    </div>
   </div>
 
   <audio id="popSound" src="pop.mp3" preload="auto"></audio>
