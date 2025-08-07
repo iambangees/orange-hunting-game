@@ -1,100 +1,51 @@
-/* Reset default margins/padding */
-* {
+html, body {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background: #222;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: Arial, sans-serif;
-}
-
-#gameContainer {
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    aspect-ratio: 3 / 4;
-    background: url("background.png") center/cover no-repeat;
-    overflow: hidden;
-}
-
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
     height: 100%;
+    overflow: hidden;
+    background: #000;
 }
 
-/* Score Display */
-#scoreDisplay {
+#ui {
     position: absolute;
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    color: white;
-    font-size: clamp(20px, 5vw, 36px);
-    background: rgba(0,0,0,0.5);
-    padding: 6px 14px;
-    border-radius: 8px;
+    z-index: 2;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
-/* Buttons */
-#startButton, #pauseButton, #retryButton {
-    font-size: clamp(18px, 4vw, 28px);
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background: orange;
+#score {
+    font-size: 5vw;
     color: white;
     font-weight: bold;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    text-shadow: 2px 2px 4px black;
 }
 
-#startButton {
-    bottom: 20px;
+button {
+    font-size: 4vw;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-#pauseButton {
-    top: 60px;
-    right: 20px;
-    transform: none;
-}
-
-#retryButton {
-    bottom: 20px;
-}
-
-/* Game Over Screen */
-#gameOverScreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
+#startBtn {
+    background: green;
     color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
 }
 
-#gameOverScreen h1 {
-    font-size: clamp(24px, 6vw, 48px);
-    margin-bottom: 10px;
+#pauseBtn {
+    background: orange;
+    color: white;
 }
 
-#gameOverScreen p {
-    font-size: clamp(18px, 4vw, 28px);
-    margin-bottom: 20px;
+canvas {
+    display: block;
+    background: url('background.png') no-repeat center center;
+    background-size: cover;
+    width: 100vw;
+    height: 100vh;
 }

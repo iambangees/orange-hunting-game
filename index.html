@@ -7,28 +7,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-
-        <!-- Score Display -->
-        <div id="scoreDisplay">Score: 0</div>
-
-        <!-- Buttons -->
-        <button id="startButton">Start Game</button>
-        <button id="pauseButton" style="display: none;">Pause</button>
-
-        <!-- Game Over Screen -->
-        <div id="gameOverScreen" style="display: none;">
-            <h1>Game Over</h1>
-            <p id="finalScore"></p>
-            <button id="retryButton">Try Again</button>
-        </div>
+    <div id="ui">
+        <div id="score">Score: 0</div>
+        <button id="pauseBtn" style="display:none;">⏸ Pause</button>
+        <button id="startBtn">▶ Start</button>
     </div>
+    <canvas id="gameCanvas"></canvas>
 
-    <!-- Sounds -->
-    <audio id="popSound" src="pop.mp3" preload="auto"></audio>
+    <audio id="popSound" src="pop.mp3"></audio>
 
-    <!-- Game Script -->
     <script src="game.js"></script>
 </body>
 </html>
