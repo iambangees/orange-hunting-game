@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orange Hunting Game</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orange Hunting Game</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div id="ui">
-        <div id="score">Score: 0</div>
-        <button id="pauseBtn" style="display:none;">⏸ Pause</button>
-        <button id="startBtn">▶ Start</button>
+  <div id="ui">
+    <div id="scoreContainer">Score: <span id="score">0</span></div>
+    <button id="pauseBtn" style="display: none;">⏸ Pause</button>
+  </div>
+
+  <div id="startScreen">
+    <button id="startBtn">▶ Play</button>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="gameOverOverlay" style="display: none;">
+    <div class="game-over-box">
+      <h2>Game Over</h2>
+      <p>Your final score: <span id="finalScore">0</span></p>
+      <button id="restartBtn">Try Again</button>
     </div>
-    <canvas id="gameCanvas"></canvas>
+  </div>
 
-    <audio id="popSound" src="pop.mp3"></audio>
-
-    <script src="game.js"></script>
+  <audio id="popSound" src="pop.mp3" preload="auto"></audio>
+  <script src="game.js"></script>
 </body>
 </html>
