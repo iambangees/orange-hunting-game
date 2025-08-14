@@ -1,140 +1,215 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// ===== DOM refs =====
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const pauseBtn = document.getElementById('pauseButton');
+const playOverlay = document.getElementById('playOverlay');
+const playBtn = document.getElementById('playButton');
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const finalScoreEl = document.getElementById('finalScore');
+const restartBtn = document.getElementById('restartButton');
 
-const orangeImage = new Image();
-orangeImage.src = "orange.png";
+const popSound = document.getElementById('popSound');
+const bgMusic = document.getElementById('bgMusic');
 
-const bombImage = new Image();
-bombImage.src = "bomb.png";
+// ===== Canvas sizing =====
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
 
-const popSound = document.getElementById("popSound");
-const scoreDisplay = document.getElementById("score");
-const startBtn = document.getElementById("startBtn");
-const restartBtn = document.getElementById("restartBtn");
-const gameOverOverlay = document.getElementById("gameOverOverlay");
-const finalScoreDisplay = document.getElementById("finalScore");
-const pauseBtn = document.getElementById("pauseBtn");
+// ===== Assets =====
+const orangeImg = new Image();
+orangeImg.src = 'orange.png';
+const bombImg = new Image();
+bombImg.src = 'bomb.png';
 
+// ===== Game state =====
+let score = 0;
 let oranges = [];
 let bombs = [];
-let score = 0;
-let gameInterval;
-let spawnInterval;
-let gameRunning = false;
-let gamePaused = false;
+let running = false;
+let paused = false;
+let spawnTimer = null;
 
-function randomX() {
-  return Math.random() * (canvas.width - 80) + 40;
+// ===== Helpers =====
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
-function spawnObjects() {
-  oranges.push({ x: randomX(), y: -50, speed: 3 + Math.random() * 3 });
-  if (Math.random() < 0.3) {
-    bombs.push({ x: randomX(), y: -50, speed: 3 + Math.random() * 3 });
+function spawnOrange() {
+  const base = Math.min(canvas.width, canvas.height);
+  const size = Math.max(48, Math.round(base * 0.09)); // ~9% of smaller side
+  oranges.push({
+    x: rand(0, canvas.width - size),
+    y: -size,
+    size,
+    speed: rand(2.2, 3.8) + base * 0.001  // slight scale with screen
+  });
+}
+
+function spawnBomb() {
+  const base = Math.min(canvas.width, canvas.height);
+  const size = Math.max(48, Math.round(base * 0.09));
+  bombs.push({
+    x: rand(0, canvas.width - size),
+    y: -size,
+    size,
+    speed: rand(2.2, 3.8) + base * 0.001
+  });
+}
+
+function startSpawning() {
+  stopSpawning();
+  spawnTimer = setInterval(() => {
+    if (!running || paused) return;
+    // spawn oranges regularly
+    spawnOrange();
+    // bombs sometimes
+    if (Math.random() < 0.28) spawnBomb();
+  }, 900);
+}
+
+function stopSpawning() {
+  if (spawnTimer) {
+    clearInterval(spawnTimer);
+    spawnTimer = null;
   }
 }
 
-function drawObjects() {
+// Draw with rounded coordinates to avoid jitter
+function drawImageNoJitter(img, obj) {
+  if (!img.complete) return; // draw only after loaded
+  ctx.drawImage(img, Math.round(obj.x), Math.round(obj.y), obj.size, obj.size);
+}
+
+function update() {
+  if (!running || paused) return;
+
+  // Clear just the pixels we draw on (canvas covers bg image via CSS)
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  oranges.forEach(o => {
-    ctx.drawImage(orangeImage, o.x, o.y, 60, 60);
-    o.y += o.speed;
-  });
-
-  bombs.forEach(b => {
-    ctx.drawImage(bombImage, b.x, b.y, 60, 60);
-    b.y += b.speed;
-  });
-}
-
-function updateGame() {
-  if (gamePaused || !gameRunning) return;
-
-  drawObjects();
-
-  oranges = oranges.filter(o => o.y < canvas.height);
-  bombs = bombs.filter(b => b.y < canvas.height);
-
-  requestAnimationFrame(updateGame);
-}
-
-function handleTap(x, y) {
-  if (!gameRunning || gamePaused) return;
-
-  for (let i = 0; i < oranges.length; i++) {
+  // Move + draw oranges
+  for (let i = oranges.length - 1; i >= 0; i--) {
     const o = oranges[i];
-    if (x > o.x && x < o.x + 60 && y > o.y && y < o.y + 60) {
-      oranges.splice(i, 1);
-      score += 1;
-      scoreDisplay.textContent = score;
+    o.y += o.speed;
+    drawImageNoJitter(orangeImg, o);
+    if (o.y > canvas.height + o.size) oranges.splice(i, 1);
+  }
+
+  // Move + draw bombs
+  for (let i = bombs.length - 1; i >= 0; i--) {
+    const b = bombs[i];
+    b.y += b.speed;
+    drawImageNoJitter(bombImg, b);
+    if (b.y > canvas.height + b.size) bombs.splice(i, 1);
+  }
+
+  requestAnimationFrame(update);
+}
+
+function handleHit(x, y) {
+  if (!running || paused) return;
+
+  // Check oranges (from topmost down)
+  for (let i = oranges.length - 1; i >= 0; i--) {
+    const o = oranges[i];
+    if (x >= o.x && x <= o.x + o.size && y >= o.y && y <= o.y + o.size) {
+      score++;
+      scoreEl.textContent = String(score);
       popSound.currentTime = 0;
-      popSound.play();
-      return;
+      popSound.play().catch(()=>{});
+      oranges.splice(i, 1);
+      return; // one hit per tap
     }
   }
 
-  for (let i = 0; i < bombs.length; i++) {
+  // Check bombs
+  for (let i = bombs.length - 1; i >= 0; i--) {
     const b = bombs[i];
-    if (x > b.x && x < b.x + 60 && y > b.y && y < b.y + 60) {
-      bombs.splice(i, 1);
+    if (x >= b.x && x <= b.x + b.size && y >= b.y && y <= b.y + b.size) {
       endGame();
       return;
     }
   }
 }
 
-canvas.addEventListener("click", (e) => handleTap(e.clientX, e.clientY));
-canvas.addEventListener("touchstart", (e) => {
-  const touch = e.touches[0];
-  handleTap(touch.clientX, touch.clientY);
+// Mouse/touch
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  handleHit(e.clientX - rect.left, e.clientY - rect.top);
 });
 
-function startGame() {
+canvas.addEventListener('touchstart', (e) => {
+  const t = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  handleHit(t.clientX - rect.left, t.clientY - rect.top);
+}, { passive: true });
+
+// Controls
+playBtn.addEventListener('click', () => {
+  // Reset state
   score = 0;
+  scoreEl.textContent = '0';
   oranges = [];
   bombs = [];
-  gameRunning = true;
-  gamePaused = false;
-  scoreDisplay.textContent = "0";
-  gameOverOverlay.style.display = "none";
-  pauseBtn.style.display = "inline-block";
-  document.getElementById("startScreen").style.display = "none";
+  running = true;
+  paused = false;
 
-  gameInterval = requestAnimationFrame(updateGame);
-  spawnInterval = setInterval(spawnObjects, 1000);
-}
+  // UI
+  playOverlay.style.display = 'none';
+  gameOverOverlay.style.display = 'none';
+  pauseBtn.style.display = 'inline-block';
+  pauseBtn.textContent = 'II';
+
+  // Audio (start on user gesture to avoid autoplay block)
+  try { bgMusic.currentTime = 0; bgMusic.play(); } catch {}
+
+  // Go
+  startSpawning();
+  update();
+});
+
+pauseBtn.addEventListener('click', () => {
+  if (!running) return;
+  paused = !paused;
+  pauseBtn.textContent = paused ? '▶' : 'II';
+  if (paused) {
+    try { bgMusic.pause(); } catch {}
+  } else {
+    try { bgMusic.play(); } catch {}
+    requestAnimationFrame(update);
+  }
+});
+
+restartBtn.addEventListener('click', () => {
+  // Same as Play (fresh round)
+  score = 0;
+  scoreEl.textContent = '0';
+  oranges = [];
+  bombs = [];
+  running = true;
+  paused = false;
+
+  gameOverOverlay.style.display = 'none';
+  pauseBtn.style.display = 'inline-block';
+  pauseBtn.textContent = 'II';
+
+  try { bgMusic.currentTime = 0; bgMusic.play(); } catch {}
+
+  startSpawning();
+  update();
+});
 
 function endGame() {
-  gameRunning = false;
-  clearInterval(spawnInterval);
-  cancelAnimationFrame(gameInterval);
-  pauseBtn.style.display = "none";
-  gameOverOverlay.style.display = "flex";
-  finalScoreDisplay.textContent = score;
+  running = false;
+  paused = false;
+  stopSpawning();
+  try { bgMusic.pause(); } catch {}
+
+  finalScoreEl.textContent = String(score);
+  gameOverOverlay.style.display = 'flex';
+  pauseBtn.style.display = 'none';
 }
-
-function restartGame() {
-  gameOverOverlay.style.display = "none";
-  startGame();
-}
-
-function togglePause() {
-  gamePaused = !gamePaused;
-  pauseBtn.textContent = gamePaused ? "▶ Resume" : "⏸ Pause";
-
-  if (!gamePaused) {
-    requestAnimationFrame(updateGame);
-  }
-}
-
-startBtn.addEventListener("click", startGame);
-restartBtn.addEventListener("click", restartGame);
-pauseBtn.addEventListener("click", togglePause);
-
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});

@@ -1,95 +1,111 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body {
-  height: 100%;
+/* Base */
+body {
+  background: #000;
   overflow: hidden;
-  font-family: Arial, sans-serif;
+  font-family: 'Press Start 2P', cursive;
+  color: #fff;
 }
 
+/* Fullscreen canvas w/ background */
 #gameCanvas {
   display: block;
-  background-image: url('background.png');
-  background-size: cover;
   width: 100vw;
   height: 100vh;
+  background: url("background.png") no-repeat center center / cover;
 }
 
-#ui {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  width: calc(100% - 20px);
-  padding: 0 10px;
-}
-
-#scoreContainer {
-  font-size: 20px;
-  color: white;
-  background: rgba(0,0,0,0.5);
-  padding: 5px 10px;
-  border-radius: 10px;
-}
-
-#pauseBtn {
-  font-size: 18px;
-  padding: 5px 10px;
-  background: #f44336;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-#startScreen {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 20;
-}
-
-#startBtn {
-  font-size: 24px;
-  padding: 12px 24px;
-  background: green;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-#gameOverOverlay {
+/* Score (top-left) */
+#score {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  font-size: clamp(16px, 4vw, 24px);
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 8px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* Pause (top-right) */
+#pauseButton {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  font-size: clamp(14px, 3.5vw, 22px);
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+}
+
+/* Play overlay (center) */
+#playOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  background: rgba(0,0,0,0.7);
 }
 
-.game-over-box {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-}
-
-#restartBtn {
-  margin-top: 10px;
-  padding: 10px 20px;
-  font-size: 16px;
-  background: #2196f3;
-  color: white;
+#playButton {
+  font-size: clamp(16px, 4.5vw, 26px);
+  padding: 14px 22px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
+  background: #ffd54f;
+  color: #000;
+  box-shadow: 0 6px 0 #b78b00;
+}
+
+/* Game Over overlay */
+#gameOverOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.85);
+}
+
+.game-over-box {
+  background: #fff;
+  color: #000;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  width: min(90vw, 420px);
+}
+
+.game-over-box h1 {
+  font-size: clamp(20px, 5vw, 32px);
+  color: #ff4747;
+  text-shadow: 0 2px 0 #a70000;
+  margin-bottom: 14px;
+}
+
+.game-over-box p {
+  font-size: clamp(14px, 3.8vw, 20px);
+  margin-bottom: 18px;
+}
+
+#restartButton {
+  font-size: clamp(14px, 4vw, 22px);
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #69f0ae;
+  color: #000;
+  box-shadow: 0 6px 0 #1e7f58;
 }
