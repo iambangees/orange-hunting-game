@@ -5,6 +5,12 @@ const scoreEl = document.getElementById('score');
 const pauseBtn = document.getElementById('pauseButton');
 const playOverlay = document.getElementById('playOverlay');
 const playBtn = document.getElementById('playButton');
+const difficultyOverlay = document.getElementById('difficultyOverlay');
+const diffBtns = document.querySelectorAll('.difficultyBtn');
+const pauseOverlay = document.getElementById('pauseOverlay');
+const resumeBtn = document.getElementById('resumeBtn');
+const restartFromPauseBtn = document.getElementById('restartFromPauseBtn');
+const muteBtn = document.getElementById('muteBtn');
 const gameOverOverlay = document.getElementById('gameOverOverlay');
 const finalScoreEl = document.getElementById('finalScore');
 const restartBtn = document.getElementById('restartButton');
@@ -33,100 +39,109 @@ let bombs = [];
 let running = false;
 let paused = false;
 let spawnTimer = null;
+let muted = false;
+let difficulty = "easy";
+
+// ===== Difficulty settings =====
+const difficultySettings = {
+  easy: { speed: [2, 3], spawnRate: 1100 },
+  medium: { speed: [3, 5], spawnRate: 850 },
+  hard: { speed: [4, 6], spawnRate: 650 }
+};
 
 // ===== Helpers =====
-function rand(min, max) {
-  return Math.random() * (max - min) + min;
-}
+function rand(min, max) { return Math.random() * (max - min) + min; }
 
 function spawnOrange() {
   const base = Math.min(canvas.width, canvas.height);
-  const size = Math.max(48, Math.round(base * 0.09)); // ~9% of smaller side
+  const size = Math.max(48, Math.round(base * 0.09));
+  const { speed } = difficultySettings[difficulty];
   oranges.push({
     x: rand(0, canvas.width - size),
     y: -size,
     size,
-    speed: rand(2.2, 3.8) + base * 0.001  // slight scale with screen
+    speed: rand(speed[0], speed[1])
   });
 }
 
 function spawnBomb() {
   const base = Math.min(canvas.width, canvas.height);
   const size = Math.max(48, Math.round(base * 0.09));
+  const { speed } = difficultySettings[difficulty];
   bombs.push({
     x: rand(0, canvas.width - size),
     y: -size,
     size,
-    speed: rand(2.2, 3.8) + base * 0.001
+    speed: rand(speed[0], speed[1])
   });
 }
 
 function startSpawning() {
   stopSpawning();
+  const { spawnRate } = difficultySettings[difficulty];
   spawnTimer = setInterval(() => {
     if (!running || paused) return;
-    // spawn oranges regularly
     spawnOrange();
-    // bombs sometimes
     if (Math.random() < 0.28) spawnBomb();
-  }, 900);
+  }, spawnRate);
 }
 
 function stopSpawning() {
-  if (spawnTimer) {
-    clearInterval(spawnTimer);
-    spawnTimer = null;
-  }
+  if (spawnTimer) clearInterval(spawnTimer);
+  spawnTimer = null;
 }
 
-// Draw with rounded coordinates to avoid jitter
-function drawImageNoJitter(img, obj) {
-  if (!img.complete) return; // draw only after loaded
-  ctx.drawImage(img, Math.round(obj.x), Math.round(obj.y), obj.size, obj.size);
+// Draw helper
+function drawImage(img, obj) {
+  if (img.complete) {
+    ctx.drawImage(img, Math.round(obj.x), Math.round(obj.y), obj.size, obj.size);
+  }
 }
 
 function update() {
   if (!running || paused) return;
 
-  // Clear just the pixels we draw on (canvas covers bg image via CSS)
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Move + draw oranges
+  // oranges
   for (let i = oranges.length - 1; i >= 0; i--) {
     const o = oranges[i];
     o.y += o.speed;
-    drawImageNoJitter(orangeImg, o);
+    drawImage(orangeImg, o);
     if (o.y > canvas.height + o.size) oranges.splice(i, 1);
   }
 
-  // Move + draw bombs
+  // bombs
   for (let i = bombs.length - 1; i >= 0; i--) {
     const b = bombs[i];
     b.y += b.speed;
-    drawImageNoJitter(bombImg, b);
+    drawImage(bombImg, b);
     if (b.y > canvas.height + b.size) bombs.splice(i, 1);
   }
 
   requestAnimationFrame(update);
 }
 
+// ===== Hit detection =====
 function handleHit(x, y) {
   if (!running || paused) return;
 
-  // Check oranges (from topmost down)
+  // oranges
   for (let i = oranges.length - 1; i >= 0; i--) {
     const o = oranges[i];
     if (x >= o.x && x <= o.x + o.size && y >= o.y && y <= o.y + o.size) {
       score++;
       scoreEl.textContent = String(score);
-      popSound.currentTime = 0;
-      popSound.play().catch(()=>{});
+      if (!muted) {
+        popSound.currentTime = 0;
+        popSound.play().catch(()=>{});
+      }
       oranges.splice(i, 1);
-      return; // one hit per tap
+      return;
     }
   }
 
-  // Check bombs
+  // bombs
   for (let i = bombs.length - 1; i >= 0; i--) {
     const b = bombs[i];
     if (x >= b.x && x <= b.x + b.size && y >= b.y && y <= b.y + b.size) {
@@ -136,21 +151,35 @@ function handleHit(x, y) {
   }
 }
 
-// Mouse/touch
-canvas.addEventListener('click', (e) => {
+// clicks / touches
+canvas.addEventListener('click', e => {
   const rect = canvas.getBoundingClientRect();
   handleHit(e.clientX - rect.left, e.clientY - rect.top);
 });
-
-canvas.addEventListener('touchstart', (e) => {
+canvas.addEventListener('touchstart', e => {
   const t = e.touches[0];
   const rect = canvas.getBoundingClientRect();
   handleHit(t.clientX - rect.left, t.clientY - rect.top);
 }, { passive: true });
 
-// Controls
+// ===== Controls =====
+
+// Play → Difficulty
 playBtn.addEventListener('click', () => {
-  // Reset state
+  playOverlay.style.display = 'none';
+  difficultyOverlay.style.display = 'flex';
+});
+
+// Select Difficulty
+diffBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    difficulty = btn.dataset.diff;
+    difficultyOverlay.style.display = 'none';
+    startGame();
+  });
+});
+
+function startGame() {
   score = 0;
   scoreEl.textContent = '0';
   oranges = [];
@@ -158,57 +187,60 @@ playBtn.addEventListener('click', () => {
   running = true;
   paused = false;
 
-  // UI
-  playOverlay.style.display = 'none';
   gameOverOverlay.style.display = 'none';
   pauseBtn.style.display = 'inline-block';
-  pauseBtn.textContent = 'II';
 
-  // Audio (start on user gesture to avoid autoplay block)
-  try { bgMusic.currentTime = 0; bgMusic.play(); } catch {}
+  if (!muted) {
+    try { bgMusic.currentTime = 0; bgMusic.play(); } catch {}
+  }
 
-  // Go
   startSpawning();
   update();
-});
+}
 
+// Pause button
 pauseBtn.addEventListener('click', () => {
   if (!running) return;
-  paused = !paused;
-  pauseBtn.textContent = paused ? '▶' : 'II';
-  if (paused) {
+  paused = true;
+  pauseBtn.style.display = 'none';
+  pauseOverlay.style.display = 'flex';
+  try { bgMusic.pause(); } catch {}
+});
+
+// Resume
+resumeBtn.addEventListener('click', () => {
+  paused = false;
+  pauseOverlay.style.display = 'none';
+  pauseBtn.style.display = 'inline-block';
+  if (!muted) try { bgMusic.play(); } catch {}
+  requestAnimationFrame(update);
+});
+
+// Restart from pause
+restartFromPauseBtn.addEventListener('click', () => {
+  pauseOverlay.style.display = 'none';
+  startGame();
+});
+
+// Mute toggle
+muteBtn.addEventListener('click', () => {
+  muted = !muted;
+  muteBtn.textContent = muted ? "Unmute" : "Mute";
+  if (muted) {
     try { bgMusic.pause(); } catch {}
   } else {
-    try { bgMusic.play(); } catch {}
-    requestAnimationFrame(update);
+    if (!paused) try { bgMusic.play(); } catch {}
   }
 });
 
-restartBtn.addEventListener('click', () => {
-  // Same as Play (fresh round)
-  score = 0;
-  scoreEl.textContent = '0';
-  oranges = [];
-  bombs = [];
-  running = true;
-  paused = false;
-
-  gameOverOverlay.style.display = 'none';
-  pauseBtn.style.display = 'inline-block';
-  pauseBtn.textContent = 'II';
-
-  try { bgMusic.currentTime = 0; bgMusic.play(); } catch {}
-
-  startSpawning();
-  update();
-});
+// Restart (from game over)
+restartBtn.addEventListener('click', () => { startGame(); });
 
 function endGame() {
   running = false;
   paused = false;
   stopSpawning();
   try { bgMusic.pause(); } catch {}
-
   finalScoreEl.textContent = String(score);
   gameOverOverlay.style.display = 'flex';
   pauseBtn.style.display = 'none';

@@ -17,12 +17,30 @@
   <!-- Pause (top-right, hidden until game starts) -->
   <button id="pauseButton" style="display:none;">II</button>
 
-  <!-- Play overlay (center) -->
+  <!-- Play overlay -->
   <div id="playOverlay">
     <button id="playButton">PLAY</button>
   </div>
 
-  <!-- Game Over overlay -->
+  <!-- Difficulty overlay -->
+  <div id="difficultyOverlay" style="display:none;">
+    <h2>Select Difficulty</h2>
+    <button class="difficultyBtn" data-diff="easy">Easy</button>
+    <button class="difficultyBtn" data-diff="medium">Medium</button>
+    <button class="difficultyBtn" data-diff="hard">Hard</button>
+  </div>
+
+  <!-- Pause Menu -->
+  <div id="pauseOverlay" style="display:none;">
+    <div class="pause-box">
+      <h2>Paused</h2>
+      <button id="resumeBtn">Resume</button>
+      <button id="restartFromPauseBtn">Restart</button>
+      <button id="muteBtn">Mute</button>
+    </div>
+  </div>
+
+  <!-- Game Over -->
   <div id="gameOverOverlay" style="display:none;">
     <div class="game-over-box">
       <h1>GAME OVER</h1>
