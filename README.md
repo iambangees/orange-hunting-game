@@ -7,7 +7,10 @@ Hunt as many oranges as possible before time runs out!
 Built with HTML, CSS, and JavaScript, the game is fast, responsive, and playable directly in your browser.
 
 🎮 Play the Game
+
 https://orange-hunting-game.vercel.app
+
+
 
 
 
@@ -34,19 +37,6 @@ https://orange-hunting-game.vercel.app
 - HTML5
 - CSS3
 - JavaScript (Vanilla)
-
-📂 Project Structure
-
-orange-hunting-game
-
-├── index.html
-├── game.js
-├── bomb.png
-├── orange.png
-├── pop.mp3
-├── style.css
-├── script.js
-└── README.md
 
 
 💻 Running Locally
