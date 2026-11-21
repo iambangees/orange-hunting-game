@@ -32,7 +32,8 @@
 
   <!-- Play overlay -->
   <div id="playOverlay">
-    <h1 id="gameTitle">🍊 ORANGE<br>HUNT</h1>
+    <div id="titleOrange">🍊</div>
+    <h1 id="gameTitle">ORANGE<br>HUNT</h1>
     <p id="bestLine" style="display:none;">BEST: <span id="bestScore">0</span></p>
     <button id="playButton">PLAY</button>
     <p id="howTo">Tap the oranges. Dodge the bombs.<br>You have 60 seconds!</p>
@@ -64,7 +65,19 @@
       <p>Score: <span id="finalScore">0</span></p>
       <p id="bestLineFinal">Best: <span id="finalBest">0</span></p>
       <p id="newBest" style="display:none;">★ NEW BEST! ★</p>
+      <button id="reviveButton" style="display:none;">▶ REVIVE +15s<span class="revive-sub">watch a short ad</span></button>
       <button id="restartButton">RESTART</button>
+    </div>
+  </div>
+
+  <!-- House ad (web fallback when no ad network is available) -->
+  <div id="adOverlay" style="display:none;">
+    <div class="ad-box">
+      <div class="ad-tag">AD</div>
+      <div id="adContent"></div>
+      <div class="ad-progress"><div id="adProgressBar"></div></div>
+      <p id="adCountdown">Your revive in 5…</p>
+      <button id="adClaimBtn" style="display:none;">CLAIM REVIVE +15s</button>
     </div>
   </div>
 

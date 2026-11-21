@@ -22,6 +22,12 @@ const finalBestEl = document.getElementById('finalBest');
 const newBestEl = document.getElementById('newBest');
 const restartBtn = document.getElementById('restartButton');
 const countdownEl = document.getElementById('countdown');
+const reviveBtn = document.getElementById('reviveButton');
+const adOverlay = document.getElementById('adOverlay');
+const adContent = document.getElementById('adContent');
+const adProgressBar = document.getElementById('adProgressBar');
+const adCountdown = document.getElementById('adCountdown');
+const adClaimBtn = document.getElementById('adClaimBtn');
 
 const popSound = document.getElementById('popSound');
 const bgMusic = document.getElementById('bgMusic');
@@ -102,6 +108,8 @@ let countT = 0;
 let countShown = '';
 let shakeT = 0;
 let flashA = 0;
+let reviveUsed = false;
+let shieldT = 0;
 let lastTs = null;
 let loopRunning = false;
 
@@ -261,6 +269,7 @@ function update(ts) {
     if (phase === 'playing') {
       elapsed += dt;
       timeLeft -= dt;
+      if (shieldT > 0) shieldT -= dt;
 
       // combo window
       if (comboWindow > 0) {
@@ -307,6 +316,13 @@ function update(ts) {
   for (const o of oranges) drawEntity(orangeImg, o);
   for (const b of bombs) drawEntity(bombImg, b);
   drawEffects(dt);
+
+  // shield glow after a revive
+  if (shieldT > 0 && phase === 'playing') {
+    ctx.strokeStyle = `rgba(128, 216, 255, ${0.45 + 0.3 * Math.sin(elapsed * 10)})`;
+    ctx.lineWidth = 7;
+    ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
+  }
 
   // red flash on explosion
   if (flashA > 0) {
@@ -365,6 +381,12 @@ function handleHit(x, y) {
     if (x >= b.x && x <= b.x + b.size && y >= b.y && y <= b.y + b.size) {
       const cx = b.x + b.size / 2, cy = b.y + b.size / 2;
       bombs.splice(i, 1);
+      if (shieldT > 0) {
+        burst(cx, cy, ['#80d8ff', '#b3e5fc', '#ffffff'], 18, 300);
+        floater(cx, cy - 10, '🛡 BLOCKED', '#80d8ff');
+        ding();
+        return;
+      }
       burst(cx, cy, ['#ff5252', '#ff9800', '#616161', '#212121'], 34, 380);
       shakeT = 0.45;
       flashA = 1;
@@ -429,6 +451,8 @@ function startGame() {
   paused = false;
   shakeT = 0;
   flashA = 0;
+  reviveUsed = false;
+  shieldT = 0;
   timerEl.textContent = String(GAME_SECONDS);
   timerEl.classList.remove('low');
   timerEl.style.display = 'block';
@@ -504,6 +528,7 @@ function endGame(reason) {
   finalScoreEl.textContent = String(score);
   finalBestEl.textContent = String(best);
   newBestEl.style.display = isNewBest && score > 0 ? 'block' : 'none';
+  reviveBtn.style.display = reviveUsed ? 'none' : 'block';
   gameOverOverlay.style.display = 'flex';
   pauseBtn.style.display = 'none';
   timerEl.style.display = 'none';
@@ -511,3 +536,99 @@ function endGame(reason) {
   countdownEl.style.display = 'none';
   showBest();
 }
+
+// ===== Rewarded ads + revive =====
+// In the Android app this uses AdMob (Google TEST ad unit for now — swap in the
+// real unit after AdMob signup). On the web, or if an ad can't load, a short
+// house ad for Bangees' own projects plays instead, so the revive always works.
+const TEST_REWARDED_UNIT = 'ca-app-pub-3940256099942544/5224354917';
+
+const HOUSE_PROMOS = [
+  { emoji: '🧭', title: 'DISCARO', text: 'Discover what\'s worth knowing — scholarships, freebies and opportunities from around the world.', link: 'https://discaro.vercel.app', linkText: 'discaro.vercel.app' },
+  { emoji: '🔤', title: 'NAME ATLAS', text: 'What does your name mean — and how does the world say it? 1,001 names and counting.', link: 'https://iambangees.github.io/name-atlas/', linkText: 'Open Name Atlas' },
+  { emoji: '🌦️', title: 'AERIS', text: 'Weather, beautifully simplified. Live conditions and forecasts for any city on Earth.', link: 'https://iambangees.github.io/aeris/', linkText: 'Open Aeris' },
+  { emoji: '🔍', title: 'CLAIM CHECKER', text: 'Before you claim that airdrop, check what it really costs. Paste the pitch, spot the traps.', link: 'https://iambangees.github.io/claim-checker/', linkText: 'Open Claim Checker' }
+];
+
+function showHouseAd() {
+  return new Promise((resolve) => {
+    const promo = HOUSE_PROMOS[Math.floor(Math.random() * HOUSE_PROMOS.length)];
+    adContent.innerHTML =
+      `<div class="ad-emoji">${promo.emoji}</div><h3>${promo.title}</h3>` +
+      `<p>${promo.text}</p><p><a href="${promo.link}" target="_blank" rel="noopener">${promo.linkText}</a></p>`;
+    adClaimBtn.style.display = 'none';
+    adOverlay.style.display = 'flex';
+    const total = 5;
+    let left = total;
+    adCountdown.textContent = `Your revive in ${left}…`;
+    adProgressBar.style.width = '0%';
+    const iv = setInterval(() => {
+      left -= 0.1;
+      adProgressBar.style.width = `${Math.min(100, (1 - left / total) * 100)}%`;
+      adCountdown.textContent = left > 0 ? `Your revive in ${Math.ceil(left)}…` : 'Your revive is ready!';
+      if (left <= 0) {
+        clearInterval(iv);
+        adClaimBtn.style.display = 'inline-block';
+      }
+    }, 100);
+    adClaimBtn.onclick = () => {
+      adOverlay.style.display = 'none';
+      resolve(true);
+    };
+  });
+}
+
+function showNativeRewarded() {
+  const AdMob = window.Capacitor.Plugins.AdMob;
+  return new Promise((resolve) => {
+    let settled = false;
+    const handles = [];
+    const cleanup = () => handles.forEach(h => { try { h.remove(); } catch {} });
+    const finish = (val) => { if (settled) return; settled = true; cleanup(); resolve(val); };
+    const fallback = () => { if (settled) return; settled = true; cleanup(); showHouseAd().then(resolve); };
+    const timer = setTimeout(fallback, 20000);
+    const wrap = (fn) => () => { clearTimeout(timer); fn(); };
+    Promise.all([
+      AdMob.addListener('onRewardedVideoAdReward', wrap(() => finish(true))),
+      AdMob.addListener('onRewardedVideoAdDismissed', wrap(() => finish(false))),
+      AdMob.addListener('onRewardedVideoAdFailedToShow', wrap(fallback)),
+      AdMob.addListener('onRewardedVideoAdFailedToLoad', wrap(fallback))
+    ]).then(hs => handles.push(...hs)).catch(() => {});
+    (async () => {
+      try {
+        await AdMob.initialize({ initializeForTesting: true });
+        await AdMob.prepareRewardVideoAd({ adId: TEST_REWARDED_UNIT });
+        await AdMob.showRewardVideoAd();
+      } catch { fallback(); }
+    })();
+  });
+}
+
+function showRewardedAd() {
+  if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.AdMob) {
+    return showNativeRewarded();
+  }
+  return showHouseAd();
+}
+
+function doRevive() {
+  reviveUsed = true;
+  oranges = [];
+  bombs = [];
+  timeLeft = Math.max(timeLeft, 0) + 15;
+  shieldT = 2.5;
+  phase = 'playing';
+  gameOverOverlay.style.display = 'none';
+  pauseBtn.style.display = 'inline-block';
+  timerEl.style.display = 'block';
+  timerEl.textContent = String(Math.ceil(timeLeft));
+  floater(canvas.width / 2, canvas.height / 2 - 40, '🛡 +15s', '#80d8ff');
+  if (!muted) { try { bgMusic.play(); } catch {} }
+}
+
+reviveBtn.addEventListener('click', async () => {
+  reviveBtn.disabled = true;
+  const earned = await showRewardedAd();
+  reviveBtn.disabled = false;
+  if (earned) doRevive();
+});

@@ -294,3 +294,171 @@ body {
   from { transform: scale(1); }
   to { transform: scale(1.1); }
 }
+
+/* ===== Opening restyle: pixel font, bigger and juicier ===== */
+#titleOrange {
+  font-size: clamp(46px, 13vw, 80px);
+  line-height: 1;
+  filter: drop-shadow(0 7px 0 rgba(0,0,0,0.3));
+  animation: orangeBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes orangeBounce {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(-14px) scale(0.96, 1.04); }
+  55% { transform: translateY(0) scale(1.05, 0.95); }
+  70% { transform: translateY(-6px) scale(1, 1); }
+}
+
+#gameTitle {
+  font-size: clamp(30px, 10vw, 62px);
+  line-height: 1.45;
+  letter-spacing: 2px;
+  text-shadow: none;
+  background: linear-gradient(180deg, #ffe082 0%, #ffb74d 45%, #ff8f00 80%, #e65100 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(4px 4px 0 #7a3b00) drop-shadow(9px 9px 0 rgba(0,0,0,0.35));
+  animation: titleBob 2.6s ease-in-out infinite;
+}
+
+@keyframes titleBob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-7px) rotate(1deg); }
+}
+
+#playButton {
+  animation: playGlow 1.6s ease-in-out infinite;
+}
+
+@keyframes playGlow {
+  0%, 100% { box-shadow: 0 6px 0 #b78b00, 0 0 0 rgba(255,213,79,0); }
+  50% { box-shadow: 0 6px 0 #b78b00, 0 0 28px rgba(255,213,79,0.9); }
+}
+
+#playButton:active, .difficultyBtn:active, .pause-box button:active, #restartButton:active {
+  transform: translateY(4px);
+}
+
+#playButton:active { box-shadow: 0 2px 0 #b78b00; }
+.difficultyBtn:active { box-shadow: 0 2px 0 #bfa600; }
+.pause-box button:active { box-shadow: 0 2px 0 #a67c00; }
+#restartButton:active { box-shadow: 0 2px 0 #1e7f58; }
+
+#difficultyOverlay h2 {
+  color: #ffe082;
+  text-shadow: 3px 3px 0 #7a3b00;
+}
+
+/* ===== Revive + house ad ===== */
+#reviveButton {
+  display: block;
+  width: 100%;
+  margin: 0 0 10px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(13px, 3.8vw, 19px);
+  line-height: 1.5;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #8e24aa;
+  color: #fff;
+  box-shadow: 0 6px 0 #5e156e;
+}
+
+#reviveButton:active { box-shadow: 0 2px 0 #5e156e; }
+
+#reviveButton .revive-sub {
+  display: block;
+  font-size: clamp(8px, 2.4vw, 11px);
+  opacity: 0.85;
+  margin-top: 6px;
+}
+
+#adOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.92);
+  padding: 16px;
+}
+
+.ad-box {
+  position: relative;
+  background: linear-gradient(160deg, #12275a, #081226);
+  color: #e8eefc;
+  border: 2px solid #2b4c7e;
+  padding: 30px 24px 24px;
+  border-radius: 14px;
+  text-align: center;
+  width: min(92vw, 430px);
+}
+
+.ad-tag {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 9px;
+  background: #ffd54f;
+  color: #000;
+  padding: 3px 7px;
+  border-radius: 4px;
+}
+
+#adContent .ad-emoji { font-size: 52px; line-height: 1.2; }
+#adContent h3 {
+  font-size: clamp(15px, 4.4vw, 21px);
+  line-height: 1.6;
+  color: #ffd54f;
+  margin: 12px 0 10px;
+}
+#adContent p {
+  font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #cfe0ff;
+  margin-bottom: 8px;
+}
+#adContent a { color: #8fb4ff; }
+
+.ad-progress {
+  height: 8px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 99px;
+  overflow: hidden;
+  margin: 18px 0 12px;
+}
+
+#adProgressBar {
+  height: 100%;
+  width: 0%;
+  background: #ffd54f;
+  border-radius: 99px;
+}
+
+#adCountdown {
+  font-size: clamp(10px, 3vw, 13px);
+  color: #9db8e8;
+  min-height: 18px;
+}
+
+#adClaimBtn {
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(12px, 3.6vw, 17px);
+  padding: 13px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #69f0ae;
+  color: #000;
+  box-shadow: 0 6px 0 #1e7f58;
+  margin-top: 8px;
+}
+
+#adClaimBtn:active { box-shadow: 0 2px 0 #1e7f58; }
