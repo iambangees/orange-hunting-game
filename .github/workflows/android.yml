@@ -1,0 +1,63 @@
+name: Build Orange Hunting Game APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "index.html"
+      - "game.js"
+      - "style.css"
+      - ".github/workflows/android.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: app
+        run: npm install --no-audit --no-fund
+
+      - name: Copy the game into the app
+        run: |
+          mkdir -p app/www
+          cp index.html game.js style.css orange.png bomb.png background.png pop.mp3 background.mp3 app/www/
+
+      - name: Sync Capacitor
+        working-directory: app
+        run: npx cap sync android
+
+      - name: Build the APK
+        working-directory: app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Name the APK
+        run: cp app/android/app/build/outputs/apk/debug/app-debug.apk orange-hunting-game.apk
+
+      - name: Publish the APK to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: orange-hunt-apk
+          name: Orange Hunting Game Android app (APK)
+          body: |
+            Installable Android build of the Orange Hunting Game — tap the oranges, dodge the bombs, beat the 60-second clock.
+
+            How to install: download **orange-hunting-game.apk** below, open it on your phone, and when Android asks, allow "install unknown apps" for your browser, then tap Install.
+          files: orange-hunting-game.apk
