@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Orange Hunting Game</string>
-    <string name="title_activity_main">Orange Hunting Game</string>
+    <string name="app_name">Orange Hunt</string>
+    <string name="title_activity_main">Orange Hunt</string>
     <string name="package_name">ai.bangees.orangehunt</string>
     <string name="custom_url_scheme">ai.bangees.orangehunt</string>
 </resources>

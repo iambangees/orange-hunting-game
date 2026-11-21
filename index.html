@@ -3,10 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Orange Hunting Game</title>
+  <title>Orange Hunt</title>
 
   <!-- Retro arcade font -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#ffa726">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -28,7 +32,7 @@
 
   <!-- Play overlay -->
   <div id="playOverlay">
-    <h1 id="gameTitle">🍊 ORANGE<br>HUNTING</h1>
+    <h1 id="gameTitle">🍊 ORANGE<br>HUNT</h1>
     <p id="bestLine" style="display:none;">BEST: <span id="bestScore">0</span></p>
     <button id="playButton">PLAY</button>
     <p id="howTo">Tap the oranges. Dodge the bombs.<br>You have 60 seconds!</p>
@@ -72,5 +76,6 @@
   <audio id="bgMusic" src="background.mp3" preload="auto" loop></audio>
 
   <script src="game.js"></script>
+  <script>if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(function(){}); }</script>
 </body>
 </html>

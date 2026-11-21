@@ -1,4 +1,4 @@
-🍊 Orange Hunting Game
+🍊 Orange Hunt
 
 A fun and lightweight browser game where your mission is simple:
 
