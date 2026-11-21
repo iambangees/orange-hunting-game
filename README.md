@@ -22,7 +22,14 @@ https://orange-hunting-game.vercel.app
 - 📱 Mobile-friendly
 - 🖥️ Desktop support
 - 🎯 Score tracking
-- ⏱️ Timer challenge
+- ⏱️ A real 60-second timer challenge
+- 💥 Combo multiplier — chain hits for bonus points
+- 🌟 Golden oranges worth +5 points and +3 seconds
+- ✨ Particle bursts, floating scores and screen shake
+- 💣 Bombs end the run — with an explosion
+- 🔊 Sound effects and 🎵 background music
+- 💾 Your best score is saved on your device
+- 📈 Three difficulty modes, and the game speeds up as you play
 - 🎨 Clean and colourful interface
 - 🌐 Runs completely in the browser
 
@@ -71,15 +78,9 @@ npx live-server
 
 🎯 Future Improvements
 
-- 🔊 Sound effects
-- 🎵 Background music
 - 🏆 Leaderboard
-- 💾 Save high scores
-- 🎁 Power-ups
-- 💥 Combo multiplier
 - 🌍 Multiple levels
 - 🎨 Themes
-- 📈 Difficulty modes
 
 🤝 Contributing
 

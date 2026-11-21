@@ -14,12 +14,24 @@
   <!-- Score (top-left) -->
   <div id="score">0</div>
 
+  <!-- Combo meter (under the score, appears on streaks) -->
+  <div id="combo" style="display:none;">COMBO ×2</div>
+
+  <!-- Timer (top-center) -->
+  <div id="timer" style="display:none;">60</div>
+
   <!-- Pause (top-right, hidden until game starts) -->
   <button id="pauseButton" style="display:none;">II</button>
 
+  <!-- Countdown (3 · 2 · 1 · GO) -->
+  <div id="countdown" style="display:none;">3</div>
+
   <!-- Play overlay -->
   <div id="playOverlay">
+    <h1 id="gameTitle">🍊 ORANGE<br>HUNTING</h1>
+    <p id="bestLine" style="display:none;">BEST: <span id="bestScore">0</span></p>
     <button id="playButton">PLAY</button>
+    <p id="howTo">Tap the oranges. Dodge the bombs.<br>You have 60 seconds!</p>
   </div>
 
   <!-- Difficulty overlay -->
@@ -44,7 +56,10 @@
   <div id="gameOverOverlay" style="display:none;">
     <div class="game-over-box">
       <h1>GAME OVER</h1>
+      <p id="gameOverReason">⏰ Time's up!</p>
       <p>Score: <span id="finalScore">0</span></p>
+      <p id="bestLineFinal">Best: <span id="finalBest">0</span></p>
+      <p id="newBest" style="display:none;">★ NEW BEST! ★</p>
       <button id="restartButton">RESTART</button>
     </div>
   </div>
