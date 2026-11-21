@@ -32,6 +32,8 @@ https://orange-hunting-game.vercel.app
 - 📈 Three difficulty modes, and the game speeds up as you play
 - 🎨 Clean and colourful interface
 - 🌐 Runs completely in the browser
+- 📴 Plays fully offline after the first visit — and as an Android app (see Releases)
+- ▶ One revive per run (+15 seconds) earned by watching a short rewarded ad (AdMob in the app; a house ad for Bangees' projects on the web)
 
 
 🕹️ How to Play
