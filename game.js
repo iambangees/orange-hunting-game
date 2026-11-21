@@ -538,10 +538,10 @@ function endGame(reason) {
 }
 
 // ===== Rewarded ads + revive =====
-// In the Android app this uses AdMob (Google TEST ad unit for now — swap in the
-// real unit after AdMob signup). On the web, or if an ad can't load, a short
-// house ad for Bangees' own projects plays instead, so the revive always works.
-const TEST_REWARDED_UNIT = 'ca-app-pub-3940256099942544/5224354917';
+// In the Android app this uses AdMob with Orange Hunt's real ad unit (below).
+// On the web, or if an ad can't load, a short house ad for Bangees' own
+// projects plays instead, so the revive always works.
+const REWARDED_UNIT = 'ca-app-pub-2663209733107420/3995748928';
 
 const HOUSE_PROMOS = [
   { emoji: '🧭', title: 'DISCARO', text: 'Discover what\'s worth knowing — scholarships, freebies and opportunities from around the world.', link: 'https://discaro.vercel.app', linkText: 'discaro.vercel.app' },
@@ -596,8 +596,8 @@ function showNativeRewarded() {
     ]).then(hs => handles.push(...hs)).catch(() => {});
     (async () => {
       try {
-        await AdMob.initialize({ initializeForTesting: true });
-        await AdMob.prepareRewardVideoAd({ adId: TEST_REWARDED_UNIT });
+        await AdMob.initialize({});
+        await AdMob.prepareRewardVideoAd({ adId: REWARDED_UNIT });
         await AdMob.showRewardVideoAd();
       } catch { fallback(); }
     })();
